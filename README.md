@@ -86,9 +86,76 @@ We will update this section as we get closer to an initial release.
 
 Please see our [guide on self hosting here](https://github.com/maybe-finance/maybe/wiki/Self-Hosting-Setup-Guide).
 
+### Deploying to AWS using Infralaunch
+
+Prepare the cloud:
+
+- Log into Amazon SES console
+- Click "SMTP Settings" and "Create SMTP credentials"
+- Save the SMTP host, username and password.
+
+Prepare the project:
+
+```sh
+infralaunch create production
+infralaunch env:pull production
+rm config/credentials.yml.enc
+bin/rails credentials:edit
+```
+
+You will be presented with a text editor - copy the value of `secret_key_base` into the `infralaunch.production.env` file (create `SECRET_KEY_BASE` variable), quit the console editor saving the file. Add the rest of variables from `.env.example` to `infralaunch.production.env` except database-related ones (these will be set automatically).
+
+Edit `infralaunch.ts`. Set the `domain` variable to the domain name you used in `infralaunch.production.env` file. Change the region if you are not using `eu-west-1`.
+
+Build and deploy:
+
+```sh
+infralaunch env:push production
+infralaunch build production
+infralaunch upload production
+infralaunch deploy production
+```
+
+Give AWS some time to start your containers, and create a secure tunnel to the database:
+
+```sh
+infralaunch tunnel:create production -d database
+```
+
+Leave this command running and open a new terminal window.
+
+In order to run database migrations via the tunnel you first need to obtain the database URL:
+
+```sh
+infralaunch output production
+```
+
+This will give you the entire stack output. Find `DATABASE_URL` under `env`, replace host part with `localhost` and port with `9000`, then pass the variable to the migration script:
+
+```sh
+env DATABASE_URL="posgtres://rdsuser:YOUR-PASSWORD@localhost:9000/rdsdatabase" DISABLE_DATABASE_ENVIRONMENT_CHECK=1 rails db:setup
+```
+
+You can kill the tunnel when this command completes.
+
+Navigate to the domain and log in:
+
+```
+Email: user@maybe.local
+Password: password
+```
+
+Don't forget to change these!
+
+As the database is initialized, you can now remove the jumpbox: set `enable` to `false` under `jumpbox` in `infralaunch.ts` and redeploy:
+
+```sh
+infralaunch deploy production
+```
+
 ## Repo Activity
 
-![Repo Activity](https://repobeats.axiom.co/api/embed/7866c9790deba0baf63ca1688b209130b306ea4e.svg "Repobeats analytics image")
+![Repo Activity](https://repobeats.axiom.co/api/embed/7866c9790deba0baf63ca1688b209130b306ea4e.svg 'Repobeats analytics image')
 
 ## Copyright & license
 

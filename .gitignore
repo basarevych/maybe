@@ -47,3 +47,6 @@
 
 # Ignore .devcontainer files
 compose-dev.yaml
+
+.infralaunch
+infralaunch.*.env

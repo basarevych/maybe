@@ -82,6 +82,7 @@ test:
 #
 production:
   <<: *default
-  database: maybe_production
-  username: maybe
-  password: <%= ENV["MAYBE_DATABASE_PASSWORD"] %>
+  #database: maybe_production
+  #username: maybe
+  #password: <%= ENV["MAYBE_DATABASE_PASSWORD"] %>
+  url: <%= ENV["DATABASE_URL"] %>
