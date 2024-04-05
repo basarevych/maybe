@@ -34,7 +34,7 @@ export const config: Config = {
         database: [
           {
             id: 'database',
-            type: 'aurora-postgresql',
+            type: 'aurora-postgres',
             skipFinalSnapshot: true,
             serverless: {
               enable: true,
@@ -43,6 +43,7 @@ export const config: Config = {
             },
             backups: {
               enable: true,
+              type: 'snapshot',
               cron: '15 0 * * ? *',
             },
           },
@@ -76,8 +77,10 @@ export const config: Config = {
               port: 3000,
               healthCheckPath: '/up',
             },
-            ingress: [
+            securityRules: [
               {
+                name: 'in-http',
+                type: 'ingress',
                 protocol: 'tcp',
                 fromPort: 3000,
                 toPort: 3000,
